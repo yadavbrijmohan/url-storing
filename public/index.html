@@ -1,45 +1,48 @@
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Title Store</title>
-    </head>
-    <body>
-        <!-- <form  method="POST" id="myform" action="/submit">
-    <label for="username">URL:</label>
-    <input type="text" id="username" name="username">
-    <label for="description">Description</label>
-    <input type = "text" id="description" name="description">
-    
-    <button type="submit">Submit</button>
-    </form> -->
-     <form method="POST" id="myform" action="/submit">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Title Store</title>
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+    <h1>🔗 Link Saver</h1>
+
+    <!-- Add Form -->
+    <form id="myform">
         <label for="username">URL:</label>
-        <input type="text" id="username" name="username">
-        <!-- CHANGED: Added line break for better spacing -->
+        <input type="text" id="username" name="username" required>
         <br><br>
-        <label for="description">Description</label>
-        <!-- CHANGED: Added a new input field for description -->
+        <label for="description">Description:</label>
         <input type="text" id="description" name="description">
-        <!-- CHANGED: Added line break for better spacing -->
         <br><br>
         <button type="submit">Submit</button>
     </form>
-  
+    
+
+    <!-- Edit Form (hidden by default) -->
+    <div id="edit-section" style="display: none; margin-top: 20px; padding: 15px; border: 2px solid #3b82f6;">
+        <h3>Edit Submission</h3>
+        <input type="hidden" id="edit-id">
+        <label>URL:</label>
+        <input type="text" id="edit-url" required>
+        <br><br>
+        <label>Description:</label>
+        <input type="text" id="edit-description">
+        <br><br>
+        <button onclick="saveEdit()">💾 Save</button>
+        <button onclick="cancelEdit()">❌ Cancel</button>
+    </div>
+
     <div id="submissions-list">
         <h2>
             📋 All Submissions
-            <button class="refresh-btn">🔄 Refresh</button>
+            <button class="refresh-btn" onclick="fetchSubmissions()">🔄 Refresh</button>
         </h2>
-        <div id="submissions-container">
-            
-        </div>
+        <div id="submissions-container"></div>
     </div>
 
     <script src="./index.js"></script>
-    
-
-    </body>
-
-    </html>
+</body>
+</html>

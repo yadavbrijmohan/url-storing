@@ -1,0 +1,14 @@
+* { box-sizing: border-box; font-family: system-ui, sans-serif; }
+body { background: #0f172a; color: #e2e8f0; padding: 2rem; max-width: 800px; margin: 0 auto; }
+h1 { text-align: center; }
+form, #edit-section { background: #1e293b; padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem; }
+input { width: 100%; padding: 0.6rem; margin-top: 0.3rem; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: inherit; }
+button { padding: 0.5rem 1rem; border: none; border-radius: 6px; background: #3b82f6; color: white; cursor: pointer; margin-right: 0.5rem; }
+button:hover { background: #2563eb; }
+.delete-btn { background: #ef4444; }
+.delete-btn:hover { background: #dc2626; }
+.edit-btn { background: #f59e0b; }
+.edit-btn:hover { background: #d97706; }
+.card { background: #1e293b; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #334155; }
+.card a { color: #60a5fa; }
+.refresh-btn { background: #10b981; font-size: 0.9rem; }
