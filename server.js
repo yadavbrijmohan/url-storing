@@ -1,82 +1,107 @@
 import express from 'express';
-import cors from 'cors'
-import bodyParser, { json } from 'body-parser';
-import path from 'path'
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 
-
 const app = express();
 const port = 3000;
-const __filename = fileURLToPath( import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const submissionPath = path.join(__dirname,'Submission.json')
-//MiddleWare thing
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json())
+const submissionPath = path.join(__dirname, 'Submission.json');
+
+app.use(cors());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(express.static("public"));
 
-app.get("/",(req, res) =>{
-    res.sendFile(path.join(__dirname , 'public' , 'index.html'));
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-// Handle Form Submission
-app.post("/submit", (req, res ) => {
-    const url = req.body.username;
-    const description = req.body.description;
-    // Read Existing data:
-    let Submission = [];
-    try {
-        const data = fs.readFileSync(submissionPath,'utf8');
-        Submission = JSON.parse(data)
 
+// GET all submissions
+app.get("/api/submission", (req, res) => {
+    try {
+        if (!fs.existsSync(submissionPath)) {
+            return res.json([]);
+        }
+        const data = fs.readFileSync(submissionPath, 'utf-8');
+        res.json(JSON.parse(data));
     } catch (err) {
         console.log(err);
+        res.json([]);
     }
-    Submission.push({
+});
+
+// POST new submission
+app.post("/submit", (req, res) => {
+    const { username: url, description } = req.body;
+
+    let submissions = [];
+    try {
+        const data = fs.readFileSync(submissionPath, 'utf8');
+        submissions = JSON.parse(data);
+    } catch (err) {
+        submissions = [];
+    }
+
+    submissions.push({
+        id: Date.now().toString(), // UNIQUE ID
         url,
         description,
         timeStamp: new Date().toISOString()
-    })
-    // Write it into the sumbissions
-    fs.writeFileSync(submissionPath,JSON.stringify(Submission,null, 2));
+    });
 
-    console.log(`User Submitted: ${url}`);
-    console.log(`Description: ${description}`)
-    res.redirect('/');
+    fs.writeFileSync(submissionPath, JSON.stringify(submissions, null, 2));
+    res.json({ success: true });
 });
-// API endpoint to get submissions as JSON
-app.get("/api/submission", (req, res) =>{
-    try{
-        const submission = fs.readFileSync(submissionPath,'utf-8');
-        res.json(JSON.parse(submission));
-    }
-    catch(err){
-        console.log("File doesnot exits");
-    }
-    
-})
-app.delete("/api/submission/:index", (req, res) => {
-    try{
-        const index = parseInt(req.params.index);
-        const data = fs.readFileSync(submissionPath,'utf-8');
-        let submission = JSON.parse(data);
 
-        if(index>=0 && index<submission.length){
-        submission.splice(index,1);
-        fs.writeFileSync(submissionPath,JSON.stringify(submission,null,2));
-        res.json({ success: true, message: "Submission deleted successfully" })
-        }
-        else{
-            res.status(404).json({ success: false, message: "Submission not found" });
+// PUT edit submission
+app.put("/api/submission/:id", (req, res) => {
+    try {
+        const id = req.params.id;
+        const { url, description } = req.body;
+        const data = fs.readFileSync(submissionPath, 'utf-8');
+        let submissions = JSON.parse(data);
+
+        const index = submissions.findIndex(s => s.id === id);
+        if (index === -1) {
+            return res.status(404).json({ success: false, message: "Not found" });
         }
 
-    }
-    catch(err){
-        console.error($`Error found ${err}`)
-    }
-    
-})
+        submissions[index].url = url || submissions[index].url;
+        submissions[index].description = description || submissions[index].description;
 
-app.listen(3000,() => {
+        fs.writeFileSync(submissionPath, JSON.stringify(submissions, null, 2));
+        res.json({ success: true, submission: submissions[index] });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false });
+    }
+});
+
+// DELETE by ID (not index)
+app.delete("/api/submission/:id", (req, res) => {
+    try {
+        const id = req.params.id;
+        const data = fs.readFileSync(submissionPath, 'utf-8');
+        let submissions = JSON.parse(data);
+
+        const newSubmissions = submissions.filter(s => s.id !== id);
+
+        if (newSubmissions.length === submissions.length) {
+            return res.status(404).json({ success: false, message: "Not found" });
+        }
+
+        fs.writeFileSync(submissionPath, JSON.stringify(newSubmissions, null, 2));
+        res.json({ success: true, message: "Deleted successfully" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ success: false });
+    }
+});
+
+app.listen(port, () => {
     console.log(`App is working on ${port}`);
-})
+});
